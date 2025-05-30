@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic-Tac-Toe</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 90vw;
+      max-width: 400px;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .cell {
+      background-color: #fff;
+      border: 2px solid #333;
+      font-size: 2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .cell.taken {
+      pointer-events: none;
+      color: #999;
+    }
+
+    .status {
+      margin: 15px 0;
+      font-size: 1.2rem;
+    }
+
+    .reset-button, .new-game-button {
+      display: block;
+      margin: 10px auto 0;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .reset-button:hover, .new-game-button:hover {
+      background-color: #555;
+    }
+
+    .end-screen {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .end-message {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="game-container">
+    <h1>Tic-Tac-Toe</h1>
+    <div class="board" id="board"></div>
+    <div class="status" id="status"></div>
+    <button class="reset-button" onclick="resetGame()">Reset Game</button>
+  </div>
+
+  <div class="container end-screen" id="end-screen">
+    <div class="end-message" id="end-message"></div>
+    <button class="new-game-button" onclick="startNewGame()">New Game</button>
+  </div>
+
+  <script>
+    const board = document.getElementById('board');
+    const statusDiv = document.getElementById('status');
+    const gameContainer = document.getElementById('game-container');
+    const endScreen = document.getElementById('end-screen');
+    const endMessage = document.getElementById('end-message');
+
+    let currentPlayer = 'X';
+    let gameActive = true;
+    const cells = [];
+
+    function createBoard() {
+      board.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = i;
+        cell.addEventListener('click', () => handleMove(cell));
+        board.appendChild(cell);
+        cells[i] = cell;
+      }
+      statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+    }
+
+    function handleMove(cell) {
+      if (!gameActive || cell.textContent !== '') return;
+      cell.textContent = currentPlayer;
+      cell.classList.add('taken');
+      if (checkWinner()) {
+        showEndScreen(`Player ${currentPlayer} wins!`);
+        return;
+      }
+      if ([...cells].every(c => c.textContent !== '')) {
+        showEndScreen("It's a draw!");
+        return;
+      }
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+    }
+
+    function checkWinner() {
+      const winPatterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6],
+      ];
+      return winPatterns.some(pattern => {
+        const [a, b, c] = pattern;
+        return cells[a].textContent &&
+               cells[a].textContent === cells[b].textContent &&
+               cells[a].textContent === cells[c].textContent;
+      });
+    }
+
+    function showEndScreen(message) {
+      gameActive = false;
+      gameContainer.style.display = 'none';
+      endMessage.textContent = message;
+      endScreen.style.display = 'flex';
+    }
+
+    function resetGame() {
+      currentPlayer = 'X';
+      gameActive = true;
+      createBoard();
+    }
+
+    function startNewGame() {
+      resetGame();
+      gameContainer.style.display = 'block';
+      endScreen.style.display = 'none';
+    }
+
+    createBoard();
+  </script>
+</body>
+</html>
